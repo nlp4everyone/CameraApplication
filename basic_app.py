@@ -13,7 +13,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.max_btn = self.findChild(QtWidgets.QPushButton, 'max_btn')
         self.min_btn = self.findChild(QtWidgets.QPushButton, 'min_btn')
         self.hide_btn = self.findChild(QtWidgets.QPushButton, 'hide_btn')
+        self.title_spacing = self.findChild(QtWidgets.QFrame, 'title_spacing')
 
+        # Get screen resolution
+        self._screen_width, self._screen_height = DisplayComponents.get_resolution()
 
         # Default setting
         self.default_setting()
@@ -21,6 +24,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def full_screen_event(self):
         """Set application to full screen resolution"""
         if self.isMaximized() == False:
+            # Set width and height
+            self.title_spacing.setMaximumWidth(int(self._screen_width / 2))
+            self.title_spacing.setMinimumWidth(int(self._screen_width / 2))
+            # Show
             self.showMaximized()
             return
         # Validate
@@ -37,6 +44,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def minimum_event(self):
         """Set application to minimun resolution"""
         if self.isMaximized() == True:
+            # Set width and height
+            self.title_spacing.setMaximumWidth(int(self._screen_width / 4))
+            self.title_spacing.setMinimumWidth(int(self._screen_width / 4))
+            # Show
             self.showNormal()
             return
         # Validate
@@ -58,12 +69,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.close()
 
     def default_setting(self):
-        # Get screen resolution
-        screen_width, screen_height = DisplayComponents.get_resolution()
         # Set default Windows resolution
         self.setWindowTitle("Camera Application")
         self.setWindowFlag(QtCore.Qt.WindowType.FramelessWindowHint)
-        self.setMinimumSize(int(screen_width / 2), int(screen_height * 3 / 4))
+        self.setMinimumSize(int(self._screen_width / 2), int(self._screen_height * 3 / 4))
+
+        # Set spacing
+        self.title_spacing.setMaximumWidth(int(self._screen_width / 4))
+        self.title_spacing.setMinimumWidth(int(self._screen_width / 4))
 
         # Button setting
         button_size = QtCore.QSize(40, 40)
