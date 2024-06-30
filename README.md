@@ -4,7 +4,8 @@ pip install -r requirements.txt
 # 🎫 For run application, type:
 python basic_app.py
 
-# Video demo
+# Video demo:
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/7JZ0e4UC3Bw/0.jpg)](https://www.youtube.com/watch?v=7JZ0e4UC3Bw)
 
-https://github.com/nlp4everyone/CameraApplication/assets/150988243/bf8f97a8-8e04-4a89-8811-77f2f4d4684f
+
 
