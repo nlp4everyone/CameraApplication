@@ -1,0 +1,4 @@
+test.py
+.idea
+camera_components/__pycache__/
+display_components/__pycache__/
