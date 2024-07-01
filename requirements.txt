@@ -1,4 +1,5 @@
-PyQt5==5.15.10
-pyqt5-tools
-opencv-python
+PyQt5==5.12.2
+pyqt5-tools==5.15.9.3.3
+opencv-python==4.5.5.64
 python-xlib==0.33
+numpy==1.23.0

@@ -683,6 +683,12 @@ QComboBox:drop-down{
                         <height>30</height>
                        </size>
                       </property>
+                      <property name="editable">
+                       <bool>true</bool>
+                      </property>
+                      <property name="currentText">
+                       <string>Not supported</string>
+                      </property>
                       <item>
                        <property name="text">
                         <string>No Devices</string>

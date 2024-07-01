@@ -1,5 +1,6 @@
 import os
 import platform
+import cv2
 class CameraComponents():
 
     @staticmethod
@@ -29,6 +30,11 @@ class CameraComponents():
 
         return camera_info
 
+    @staticmethod
+    def isAvailableCamera(index: int) -> bool:
 
+        # Check if camera is available
+        cap = cv2.VideoCapture(index)
+        return True if cap.isOpened() else False
 
 
