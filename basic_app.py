@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.uic import loadUi
 from display_components import DisplayComponents
 from camera_components import CameraComponents
+from config_component import ConfigManagement
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -118,14 +119,35 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.close()
 
     def selected_camera_event_handler(self,index):
+        # When user selected None
+        if index == 0:
+            # Set config
+            ConfigManagement.set_config(section = "Camera1",
+                                        option = "device_name",
+                                        value = "")
+            ConfigManagement.set_config(section = "Camera1",
+                                        option = "index",
+                                        value = "")
+            # Alert
+            self.show_message_box_alert(title="Alert",
+                                        content=f"No device has been selected!")
+            return
+
         # Get selected camera infor
+        index -= 1 # First index is just for displayed
         selected_camera = self.__list_camera[index]
         # Validate camera
         camera_index = selected_camera[0]
-        isAvailalbe = CameraComponents.isAvailableCamera(camera_index)
+        isAvailalbe = CameraComponents.is_available_camera(camera_index)
 
         # When camera is unavailable
         if not isAvailalbe:
+            ConfigManagement.set_config(section="Camera1",
+                                        option="device_name",
+                                        value="")
+            ConfigManagement.set_config(section="Camera1",
+                                        option="index",
+                                        value="")
             self.show_message_box_alert(title = "Alert",
                                         content = f"Cannot connect 0 to device: {selected_camera[1]}")
             return
@@ -133,6 +155,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # Show state
         self.show_message_box_alert(title="Notification",
                                     content=f"Connected to device: {selected_camera[1]}")
+        # # Persist config
+        ConfigManagement.set_config(section = "Camera1",
+                                    option = "device_name",
+                                    value = selected_camera[1])
+        ConfigManagement.set_config(section = "Camera1",
+                                    option = "index",
+                                    value = str(selected_camera[0]))
 
     def show_message_box_alert(self,
                          title: str,
@@ -208,7 +237,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.cam1_cbx.clear()
         self.cam1_cbx.addItem("No Devices")
         self.add_camera_info()
-        self.cam1_cbx.currentIndexChanged.connect(self.selected_camera_event_handler)
+        self.cam1_cbx.activated.connect(self.selected_camera_event_handler)
 
     def set_widget_style(self):
         self.cam1_cbx.setStyleSheet("""
@@ -281,7 +310,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def add_camera_info(self) :
         # Get camera infor
-        cameras_infor = CameraComponents.get_property()
+        cameras_infor = CameraComponents.get_available_cameras()
         self.__list_camera = []
         # Clear list
         if len(cameras_infor) == 0:
@@ -289,6 +318,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         # Clear list
         self.cam1_cbx.clear()
+        self.cam1_cbx.addItem("None")
 
         # Add item
         for (i,camera_infor) in enumerate(cameras_infor):

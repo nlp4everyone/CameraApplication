@@ -1,10 +1,15 @@
 import os
 import platform
 import cv2
+from deprecated import deprecated
+from PyQt5.QtMultimedia import *
+camera_info = QCameraInfo()
+
 class CameraComponents():
 
     @staticmethod
-    def get_property() -> list:
+    @deprecated(reason="The result of this function may not precise")
+    def available_cameras() -> list:
         """Get camera properties (index, name) at current machine"""
         # Currently only support Linux
         os_name = platform.system()
@@ -31,7 +36,11 @@ class CameraComponents():
         return camera_info
 
     @staticmethod
-    def isAvailableCamera(index: int) -> bool:
+    def get_available_cameras() -> list:
+        return [(i,camera_name.description()) for (i,camera_name) in enumerate(camera_info.availableCameras())]
+
+    @staticmethod
+    def is_available_camera(index: int) -> bool:
 
         # Check if camera is available
         cap = cv2.VideoCapture(index)
