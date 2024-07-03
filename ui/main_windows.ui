@@ -457,12 +457,9 @@
           <item>
            <widget class="QStackedWidget" name="stacked_display_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="setting_page">
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
              <layout class="QVBoxLayout" name="verticalLayout_5">
               <property name="spacing">
                <number>0</number>
@@ -479,20 +476,17 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
-              <item alignment="Qt::AlignTop">
+              <item>
                <widget class="QFrame" name="setting_frame">
-                <property name="styleSheet">
-                 <string notr="true">border: None;</string>
-                </property>
                 <property name="frameShape">
                  <enum>QFrame::StyledPanel</enum>
                 </property>
                 <property name="frameShadow">
                  <enum>QFrame::Raised</enum>
                 </property>
-                <layout class="QVBoxLayout" name="verticalLayout_6">
+                <layout class="QVBoxLayout" name="verticalLayout_8">
                  <property name="spacing">
-                  <number>6</number>
+                  <number>0</number>
                  </property>
                  <property name="leftMargin">
                   <number>0</number>
@@ -542,15 +536,24 @@
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_5">
+                   <layout class="QHBoxLayout" name="horizontalLayout_7">
                     <property name="spacing">
                      <number>10</number>
                     </property>
                     <property name="leftMargin">
                      <number>200</number>
                     </property>
+                    <property name="topMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>9</number>
+                    </property>
                     <item>
-                     <widget class="QLabel" name="label">
+                     <widget class="QLabel" name="label_4">
                       <property name="minimumSize">
                        <size>
                         <width>0</width>
@@ -578,46 +581,29 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QComboBox" name="cam1_cbx">
+                     <widget class="QComboBox" name="c1_cbx">
                       <property name="minimumSize">
                        <size>
-                        <width>100</width>
+                        <width>200</width>
                         <height>30</height>
                        </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">QComboBox{
-	border: 2px solid #ced4da;
-	border-radius: 4px;
-}
-QComboBox:drop-down{
-	border: 0px;
-}
-</string>
+                      <property name="maximumSize">
+                       <size>
+                        <width>200</width>
+                        <height>16777215</height>
+                       </size>
                       </property>
-                      <property name="insertPolicy">
-                       <enum>QComboBox::InsertAtBottom</enum>
-                      </property>
-                      <item>
-                       <property name="text">
-                        <string>Item1</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>Item2</string>
-                       </property>
-                      </item>
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer">
+                     <spacer name="horizontalSpacer_3">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
-                        <width>130</width>
+                        <width>28</width>
                         <height>20</height>
                        </size>
                       </property>
@@ -645,7 +631,7 @@ QComboBox:drop-down{
                      <number>200</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="label_2">
+                     <widget class="QLabel" name="label_3">
                       <property name="minimumSize">
                        <size>
                         <width>0</width>
@@ -673,21 +659,27 @@ QComboBox:drop-down{
                      </widget>
                     </item>
                     <item>
-                     <widget class="QComboBox" name="cam2_cbx">
+                     <widget class="QComboBox" name="c2_cbx">
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>100</width>
+                        <width>200</width>
                         <height>30</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>200</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="editable">
                        <bool>true</bool>
                       </property>
                       <property name="currentText">
-                       <string>Not supported</string>
+                       <string>No Devices</string>
                       </property>
                       <item>
                        <property name="text">
@@ -723,7 +715,7 @@ QComboBox:drop-down{
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_7">
+                   <layout class="QHBoxLayout" name="horizontalLayout_8">
                     <property name="leftMargin">
                      <number>200</number>
                     </property>
@@ -755,7 +747,7 @@ QComboBox:drop-down{
                      </widget>
                     </item>
                     <item>
-                     <spacer name="horizontalSpacer_3">
+                     <spacer name="horizontalSpacer_4">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
                       </property>
@@ -770,15 +762,105 @@ QComboBox:drop-down{
                    </layout>
                   </widget>
                  </item>
+                 <item>
+                  <spacer name="verticalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>227</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
                 </layout>
                </widget>
               </item>
              </layout>
             </widget>
             <widget class="QWidget" name="preview_page">
-             <property name="styleSheet">
-              <string notr="true">background-color: rgb(170, 0, 0);</string>
-             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QFrame" name="page_frame">
+                <property name="styleSheet">
+                 <string notr="true">border : None;</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_7">
+                 <item>
+                  <widget class="QFrame" name="preview_frame">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>700</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>700</height>
+                    </size>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_9">
+                    <item>
+                     <widget class="QLabel" name="label">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_5">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="system_frame">
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </widget>
           </item>

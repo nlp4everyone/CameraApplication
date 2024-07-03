@@ -4,6 +4,7 @@ from PyQt5.uic import loadUi
 from display_components import DisplayComponents
 from camera_components import CameraComponents
 from config_component import ConfigManagement
+import cv2
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -24,15 +25,41 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.stacked_display_widget = self.findChild(QtWidgets.QStackedWidget, 'stacked_display_widget')
         self.setting_page = self.findChild(QtWidgets.QWidget, 'setting_page')
         self.preview_page = self.findChild(QtWidgets.QWidget, 'preview_page')
-        self.cam1_cbx = self.findChild(QtWidgets.QComboBox, 'cam1_cbx')
-        self.cam2_cbx = self.findChild(QtWidgets.QComboBox, 'cam2_cbx')
+        self.cam1_cbx = self.findChild(QtWidgets.QComboBox, 'c1_cbx')
+        self.cam2_cbx = self.findChild(QtWidgets.QComboBox, 'c2_cbx')
         self.dual_cb = self.findChild(QtWidgets.QCheckBox, 'dual_cb')
+
+        self.label = self.findChild(QtWidgets.QLabel, 'label')
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.cap = cv2.VideoCapture(0)
+        self.initUI()
+
 
         # Get screen resolution
         self._screen_width, self._screen_height = DisplayComponents.get_resolution()
 
         # Default setting
         self.default_setting()
+
+    def initUI(self):
+        # self.layout = QtWidgets.QVBoxLayout(self)
+        # self.layout.addWidget(self.label)
+        # self.setLayout(self.layout)
+
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.update_frame)
+        self.timer.start(100)  # Update frame every 20ms
+
+    def update_frame(self):
+        ret, frame = self.cap.read()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            height, width, channel = frame.shape
+            bytes_per_line = 3 * width
+            q_img = QtGui.QImage(frame.data, width, height, bytes_per_line, QtGui.QImage.Format_RGB888)
+            pix_map = QtGui.QPixmap.fromImage(q_img)
+            self.label.setPixmap(pix_map)
 
     def full_screen_event_handler(self) -> None:
         """Set application to full screen resolution"""
