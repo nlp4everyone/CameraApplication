@@ -28,13 +28,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.cam1_cbx = self.findChild(QtWidgets.QComboBox, 'c1_cbx')
         self.cam2_cbx = self.findChild(QtWidgets.QComboBox, 'c2_cbx')
         self.dual_cb = self.findChild(QtWidgets.QCheckBox, 'dual_cb')
-
-        self.label = self.findChild(QtWidgets.QLabel, 'label')
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-
-        self.cap = cv2.VideoCapture(0)
-        self.initUI()
-
+        self.cam1_frame = self.findChild(QtWidgets.QFrame, 'cam1_frame')
+        self.cam1_display = self.findChild(QtWidgets.QLabel, 'cam1_display')
 
         # Get screen resolution
         self._screen_width, self._screen_height = DisplayComponents.get_resolution()
@@ -42,14 +37,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # Default setting
         self.default_setting()
 
-    def initUI(self):
-        # self.layout = QtWidgets.QVBoxLayout(self)
-        # self.layout.addWidget(self.label)
-        # self.setLayout(self.layout)
-
+    def initCamera(self, camera_index: int ):
+        self.cap = cv2.VideoCapture(camera_index)
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(100)  # Update frame every 20ms
+        self.timer.start(20)  # Update frame every 20ms
 
     def update_frame(self):
         ret, frame = self.cap.read()
@@ -59,7 +51,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             bytes_per_line = 3 * width
             q_img = QtGui.QImage(frame.data, width, height, bytes_per_line, QtGui.QImage.Format_RGB888)
             pix_map = QtGui.QPixmap.fromImage(q_img)
-            self.label.setPixmap(pix_map)
+            self.cam1_display.setPixmap(pix_map)
+
+
 
     def full_screen_event_handler(self) -> None:
         """Set application to full screen resolution"""
@@ -112,6 +106,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             }
         """)
 
+        # Release Cv2 Cap
+        try:
+            if self.cap.isOpened(): self.cap.release()
+        except:
+            pass
+
+
     def preview_mode_handler(self) -> None:
         # Change main widget
         self.stacked_display_widget.setCurrentWidget(self.preview_page)
@@ -130,6 +131,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 background-color: rgb(218, 145, 0);
             }
         """)
+
+        # Open Camera
+        camera1_config = ConfigManagement.get_sections_config("Camera1")
+        index = camera1_config["Camera1"]["index"]
+        if index != "":
+            self.initCamera(int(index))
 
 
     def close_event_handler(self) -> None:
@@ -265,6 +272,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.cam1_cbx.addItem("No Devices")
         self.add_camera_info()
         self.cam1_cbx.activated.connect(self.selected_camera_event_handler)
+
+        # Camera1 Display setting
+        self.cam1_display.setAlignment(QtCore.Qt.AlignCenter)
+        pix_map = QtGui.QPixmap("icons/no_image.jpg")
+        self.cam1_display.setFixedSize(640, 480)
+        self.cam1_display.setPixmap(pix_map)
 
     def set_widget_style(self):
         self.cam1_cbx.setStyleSheet("""
