@@ -5,6 +5,8 @@ from display_components import DisplayComponents
 from camera_components import CameraComponents
 from config_component import ConfigManagement
 import cv2
+from datetime import datetime
+now = datetime.now()
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -30,6 +32,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.dual_cb = self.findChild(QtWidgets.QCheckBox, 'dual_cb')
         self.cam1_frame = self.findChild(QtWidgets.QFrame, 'cam1_frame')
         self.cam1_display = self.findChild(QtWidgets.QLabel, 'cam1_display')
+        self.notification_widget = self.findChild(QtWidgets.QListWidget, 'notification_widget')
 
         # Get screen resolution
         self._screen_width, self._screen_height = DisplayComponents.get_resolution()
@@ -53,7 +56,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             pix_map = QtGui.QPixmap.fromImage(q_img)
             self.cam1_display.setPixmap(pix_map)
 
+    def add_notification(self, content :str):
+        # Get time
+        date_time = now.strftime("%H:%M:%S")
 
+        # Get Item
+        item = QtWidgets.QListWidgetItem()
+        item.setText(f"[{date_time}] : {content}")
+        self.notification_widget.addItem(item)
 
     def full_screen_event_handler(self) -> None:
         """Set application to full screen resolution"""
@@ -135,8 +145,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # Open Camera
         camera1_config = ConfigManagement.get_sections_config("Camera1")
         index = camera1_config["Camera1"]["index"]
+        device = camera1_config["Camera1"]["device_name"]
         if index != "":
-            self.initCamera(int(index))
+            try:
+                self.initCamera(int(index))
+                fps = self.cap.get(5)
+                self.add_notification(f"Connect to device: {device} with default FPS: {fps}")
+            except Exception as e:
+                print(e)
 
 
     def close_event_handler(self) -> None:
@@ -278,6 +294,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         pix_map = QtGui.QPixmap("icons/no_image.jpg")
         self.cam1_display.setFixedSize(640, 480)
         self.cam1_display.setPixmap(pix_map)
+
+        # Notification Widget
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(14)
+        self.notification_widget.setFont(font)
 
     def set_widget_style(self):
         self.cam1_cbx.setStyleSheet("""
