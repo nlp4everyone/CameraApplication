@@ -1,19 +1,14 @@
-import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.uic import loadUi
 from display_components import DisplayComponents
-from camera_components import CameraComponents
-from config_component import ConfigManagement
-import cv2
 from datetime import datetime
 now = datetime.now()
 
-class Ui_MainWindow(QtWidgets.QMainWindow):
+class BaseUI(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         # Load UI
         loadUi("ui/main_windows.ui",self)
-
 
         # Get children
         self.exit_btn = self.findChild(QtWidgets.QPushButton, 'exit_btn')
@@ -33,28 +28,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.cam1_frame = self.findChild(QtWidgets.QFrame, 'cam1_frame')
         self.cam1_display = self.findChild(QtWidgets.QLabel, 'cam1_display')
         self.notification_widget = self.findChild(QtWidgets.QListWidget, 'notification_widget')
-
         # Get screen resolution
         self._screen_width, self._screen_height = DisplayComponents.get_resolution()
 
         # Default setting
-        self.default_setting()
-
-    def initCamera(self, camera_index: int ):
-        self.cap = cv2.VideoCapture(camera_index)
-        self.timer = QtCore.QTimer(self)
-        self.timer.timeout.connect(self.update_frame)
-        self.timer.start(20)  # Update frame every 20ms
-
-    def update_frame(self):
-        ret, frame = self.cap.read()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            height, width, channel = frame.shape
-            bytes_per_line = 3 * width
-            q_img = QtGui.QImage(frame.data, width, height, bytes_per_line, QtGui.QImage.Format_RGB888)
-            pix_map = QtGui.QPixmap.fromImage(q_img)
-            self.cam1_display.setPixmap(pix_map)
+        #self.default_setting()
 
     def add_notification(self, content :str):
         # Get time
@@ -75,9 +53,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.showMaximized()
             return
 
-        # Validate
-        self.show_message_box_alert(title="Warning",
-                                    content="You're currently in Full-screen mode!")
 
     def minimum_event_handler(self) -> None:
         """Set application to minimun resolution"""
@@ -88,10 +63,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             # Show
             self.showNormal()
             return
-
-        # Validate
-        self.show_message_box_alert(title = "Warning",
-                                    content = "You're currently in Normal mode!")
 
     def hide_event_handler(self) -> None:
         """Set application to backgroud mode"""
@@ -116,12 +87,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             }
         """)
 
-        # Release Cv2 Cap
-        try:
-            if self.cap.isOpened(): self.cap.release()
-        except:
-            pass
-
 
     def preview_mode_handler(self) -> None:
         # Change main widget
@@ -142,19 +107,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             }
         """)
 
-        # Open Camera
-        camera1_config = ConfigManagement.get_sections_config("Camera1")
-        index = camera1_config["Camera1"]["index"]
-        device = camera1_config["Camera1"]["device_name"]
-        if index != "":
-            try:
-                self.initCamera(int(index))
-                fps = self.cap.get(5)
-                self.add_notification(f"Connect to device: {device} with default FPS: {fps}")
-            except Exception as e:
-                print(e)
-
-
     def close_event_handler(self) -> None:
         """Close the application"""
         answer = QtWidgets.QMessageBox.question(
@@ -168,64 +120,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if answer == QtWidgets.QMessageBox.StandardButton.Yes:
             self.close()
 
-    def selected_camera_event_handler(self,index):
-        # When user selected None
-        if index == 0:
-            # Set config
-            ConfigManagement.set_config(section = "Camera1",
-                                        option = "device_name",
-                                        value = "")
-            ConfigManagement.set_config(section = "Camera1",
-                                        option = "index",
-                                        value = "")
-            # Alert
-            self.show_message_box_alert(title="Alert",
-                                        content=f"No device has been selected!")
-            return
-
-        # Get selected camera infor
-        index -= 1 # First index is just for displayed
-        selected_camera = self.__list_camera[index]
-        # Validate camera
-        camera_index = selected_camera[0]
-        isAvailalbe = CameraComponents.is_available_camera(camera_index)
-
-        # When camera is unavailable
-        if not isAvailalbe:
-            ConfigManagement.set_config(section="Camera1",
-                                        option="device_name",
-                                        value="")
-            ConfigManagement.set_config(section="Camera1",
-                                        option="index",
-                                        value="")
-            self.show_message_box_alert(title = "Alert",
-                                        content = f"Cannot connect 0 to device: {selected_camera[1]}")
-            return
-
-        # Show state
-        self.show_message_box_alert(title="Notification",
-                                    content=f"Connected to device: {selected_camera[1]}")
-        # # Persist config
-        ConfigManagement.set_config(section = "Camera1",
-                                    option = "device_name",
-                                    value = selected_camera[1])
-        ConfigManagement.set_config(section = "Camera1",
-                                    option = "index",
-                                    value = str(selected_camera[0]))
-
-    def show_message_box_alert(self,
-                         title: str,
-                         content: str,
-                         mode: QtWidgets.QMessageBox = QtWidgets.QMessageBox.Warning,):
-        msg = QtWidgets.QMessageBox()
-        msg.setIcon(mode)
-        # setting message for Message Box
-        msg.setText(content)
-        # setting Message box window title
-        msg.setWindowTitle(title)
-        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        # start the app
-        msg.exec_()
 
     def default_setting(self) -> None:
         # Set default Windows resolution
@@ -245,29 +139,24 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
 
         # Exit Button
-        self.exit_btn.clicked.connect(self.close_event_handler)
         self.exit_btn.setToolTip("Exit")
         self.exit_btn.setIcon(QtGui.QIcon('icons/exit.png'))
         self.exit_btn.setIconSize(large_icon_size)
         # Close Button
         self.close_btn.setIcon(QtGui.QIcon('icons/exit_2.png'))
         self.close_btn.setIconSize(QtCore.QSize(30,30))
-        self.close_btn.clicked.connect(self.close_event_handler)
 
         # Maximize Windows Button
-        self.max_btn.clicked.connect(self.full_screen_event_handler)
         self.max_btn.setToolTip("Maximize")
         self.max_btn.setIcon(QtGui.QIcon('icons/maximize.png'))
         self.max_btn.setIconSize(large_icon_size)
 
         # Minimize Windows Button
-        self.min_btn.clicked.connect(self.minimum_event_handler)
         self.min_btn.setToolTip("Minimize")
         self.min_btn.setIcon(QtGui.QIcon('icons/minimize.png'))
         self.min_btn.setIconSize(large_icon_size)
 
         # Minimize Windows Button
-        self.hide_btn.clicked.connect(self.hide_event_handler)
         self.hide_btn.setToolTip("Hide")
         self.hide_btn.setIcon(QtGui.QIcon('icons/hide.png'))
         self.hide_btn.setIconSize(large_icon_size)
@@ -275,19 +164,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # Feature setup
         self.setting_btn.setIcon(QtGui.QIcon('icons/setting.png'))
         self.setting_btn.setIconSize(medium_icon_size)
-        self.setting_btn.clicked.connect(self.setting_mode_handler)
         self.preview_btn.setIcon(QtGui.QIcon('icons/camera.png'))
         self.preview_btn.setIconSize(medium_icon_size)
-        self.preview_btn.clicked.connect(self.preview_mode_handler)
 
         # Set widget style
         self.set_widget_style()
-
-        # Cam setting combo box with default value
-        self.cam1_cbx.clear()
-        self.cam1_cbx.addItem("No Devices")
-        self.add_camera_info()
-        self.cam1_cbx.activated.connect(self.selected_camera_event_handler)
 
         # Camera1 Display setting
         self.cam1_display.setAlignment(QtCore.Qt.AlignCenter)
@@ -300,6 +181,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         font.setFamily("Arial")
         font.setPointSize(14)
         self.notification_widget.setFont(font)
+
+    def show_message_box_alert(self,
+                         title: str,
+                         content: str,
+                         mode: QtWidgets.QMessageBox = QtWidgets.QMessageBox.Warning,):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(mode)
+        # setting message for Message Box
+        msg.setText(content)
+        # setting Message box window title
+        msg.setWindowTitle(title)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        # start the app
+        msg.exec_()
 
     def set_widget_style(self):
         self.cam1_cbx.setStyleSheet("""
@@ -370,23 +265,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     }
                 """)
 
-    def add_camera_info(self) :
-        # Get camera infor
-        cameras_infor = CameraComponents.get_available_cameras()
-        self.__list_camera = []
-        # Clear list
-        if len(cameras_infor) == 0:
-            return
-
-        # Clear list
-        self.cam1_cbx.clear()
-        self.cam1_cbx.addItem("None")
-
-        # Add item
-        for (i,camera_infor) in enumerate(cameras_infor):
-            camera_name = camera_infor[1]
-            self.cam1_cbx.addItem(f"{i}. {camera_name}")
-        self.__list_camera = cameras_infor
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -403,9 +281,3 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def mouseReleaseEvent(self, event):
         self.offset = None
 
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    ui = Ui_MainWindow()
-    ui.show()
-    sys.exit(app.exec_())

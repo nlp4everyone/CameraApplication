@@ -1,5 +1,6 @@
 test.py
 .idea
+__pycache__/
 camera_components/__pycache__/
 display_components/__pycache__/
 config_component/__pycache__/
