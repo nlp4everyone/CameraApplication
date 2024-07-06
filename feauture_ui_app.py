@@ -1,17 +1,25 @@
-import sys
+import sys, cv2
 from PyQt5 import QtCore, QtGui, QtWidgets
 from camera_components import CameraComponents
 from config_component import ConfigManagement
-import cv2
 from datetime import datetime
 from base_ui_app import BaseUI
+from typing import Literal
 now = datetime.now()
 
 class Feature_MainWindow(BaseUI):
     def __init__(self):
         super().__init__()
-        # Load default setting
+        # Load default UI setting
         self.default_setting()
+
+        self.cap = None
+        # Load camera config
+        index, device = self.load_camera_config()
+        # Verify camera
+        state = self.verify_camera_info(index=index, device_name=device)
+        index = 0 if not state else int(index) + 1
+        self.cam1_cbx.setCurrentIndex(index)
 
     def initCamera(self, camera_index: int ):
         self.cap = cv2.VideoCapture(camera_index)
@@ -46,7 +54,8 @@ class Feature_MainWindow(BaseUI):
 
         # Get selected camera infor
         index -= 1 # First index is just for displayed
-        selected_camera = self.__list_camera[index]
+        selected_camera = self.get_available_cameras()[index]
+
         # Validate camera
         camera_index = selected_camera[0]
         isAvailalbe = CameraComponents.is_available_camera(camera_index)
@@ -92,7 +101,7 @@ class Feature_MainWindow(BaseUI):
         # Cam setting combo box with default value
         self.cam1_cbx.clear()
         self.cam1_cbx.addItem("No Devices")
-        self.add_camera_info()
+        self.append_list_cameras()
         self.cam1_cbx.activated.connect(self.selected_camera_event_handler)
 
 
@@ -117,32 +126,38 @@ class Feature_MainWindow(BaseUI):
     def setting_mode_handler(self) -> None:
         # Inherit function from parent class
         super().setting_mode_handler()
+
         # Release Cv2 Cap
-        try:
+        if self.cap != None:
             if self.cap.isOpened(): self.cap.release()
-        except:
-            pass
 
     def preview_mode_handler(self) -> None:
         # Inherit function from parent class
         super().preview_mode_handler()
 
-        # Open Camera
-        camera1_config = ConfigManagement.get_sections_config("Camera1")
-        index = camera1_config["Camera1"]["index"]
-        device = camera1_config["Camera1"]["device_name"]
-        if index != "":
-            try:
-                self.initCamera(int(index))
-                fps = self.cap.get(5)
-                self.add_notification(f"Connect to device: {device} with default FPS: {fps}")
-            except Exception as e:
-                print(e)
+        # Load camera
+        index, device = self.load_camera_config()
+        # Verify camera
+        state = self.verify_camera_info(index=index, device_name=device)
 
-    def add_camera_info(self) :
+        # When no camera is suitable
+        cbx_index = 0 if not state else int(index) + 1
+        self.cam1_cbx.setCurrentIndex(cbx_index)
+
+        if cbx_index != 0:
+            # Default setting
+            self.initCamera(int(index))
+            fps = self.cap.get(5)
+            self.add_notification(f"Connect to device: {device} with default FPS: {fps}")
+
+
+    def get_available_cameras(self):
+        return CameraComponents.get_available_cameras()
+
+    def append_list_cameras(self) :
         # Get camera infor
-        cameras_infor = CameraComponents.get_available_cameras()
-        self.__list_camera = []
+        cameras_infor = self.get_available_cameras()
+
         # Clear list
         if len(cameras_infor) == 0:
             return
@@ -155,11 +170,35 @@ class Feature_MainWindow(BaseUI):
         for (i,camera_infor) in enumerate(cameras_infor):
             camera_name = camera_infor[1]
             self.cam1_cbx.addItem(f"{i}. {camera_name}")
-        self.__list_camera = cameras_infor
 
-    def load_camera_info(self):
-        config = ConfigManagement.get_sections_config("Camera1")
-        print(config)
+    def load_camera_config(self, section_name :Literal["Camera1","Camera2"] = "Camera1"):
+        # Load config
+        camera1_config = ConfigManagement.get_sections_config(section_name)
+        index = camera1_config[section_name]["index"]
+        device = camera1_config[section_name]["device_name"]
+        return index, device
+
+    def verify_camera_info(self, index :int, device_name :str):
+        # Verify step
+        # When index is None, set default
+        if index == "":
+            return False
+
+        # No available devices
+        list_device = self.get_available_cameras()
+        if len(list_device) == 0:
+            return False
+
+        index = int(index)
+        # Not correct index
+        if index > len(list_device) -1:
+            return False
+
+        # Verify if saved device name is current device
+        if list_device[index][1] == device_name:
+            return True
+        return False
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
